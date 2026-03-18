@@ -1,0 +1,335 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # MLOps Infrastructure
+  # ============================================================================
+  
+  # MLflow Tracking Server
+  mlflow:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mlflow
+    container_name: mlflow_server
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_artifacts:/mlflow/artifacts
+      - mlflow_backend:/mlflow/backend
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "com.federated.component=mlops"
+      - "com.federated.service=mlflow"
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      aggregation_server:
+        condition: service_healthy
+      bank_client_1:
+        condition: service_started
+      bank_client_2:
+        condition: service_started
+      bank_client_3:
+        condition: service_started
+    labels:
+      - "com.federated.component=mlops"
+      - "com.federated.service=prometheus"
+
+  # Grafana Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ../monitoring/grafana:/etc/grafana/provisioning/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3000
+      - GF_INSTALL_PLUGINS=
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    labels:
+      - "com.federated.component=mlops"
+      - "com.federated.service=grafana"
+
+  # ============================================================================
+  # Federated Learning Components
+  # ============================================================================
+  
+  # Aggregation Server (Central Coordinator)
+  aggregation_server:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.aggregation_server
+    container_name: aggregation_server
+    ports:
+      - "8080:8080"  # Flower server
+      - "8001:8001"  # Prometheus metrics
+    volumes:
+      - ../config:/app/config:ro
+      - ../data:/app/data:ro
+      - server_models:/app/models
+      - server_logs:/app/logs
+      - server_results:/app/results
+    environment:
+      - PYTHONUNBUFFERED=1
+      - FL_SERVER_ADDRESS=0.0.0.0:8080
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PROMETHEUS_PORT=8001
+      - LOG_LEVEL=INFO
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 60s
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    labels:
+      - "com.federated.component=fl"
+      - "com.federated.service=aggregation_server"
+      - "com.federated.role=server"
+    command: >
+      sh -c "echo 'Aggregation Server ready. Start FL with: python -m src.federated.aggregation_server' && tail -f /dev/null"
+
+  # Bank Client 1 (ProductCD: W)
+  bank_client_1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bank_client
+    container_name: bank_client_1
+    ports:
+      - "8100:8000"  # Prometheus metrics
+    volumes:
+      - ../config:/app/config:ro
+      - ../data:/app/data:ro
+      - bank1_models:/app/models
+      - bank1_logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - BANK_ID=bank1
+      - PRODUCT_CD=W
+      - FL_SERVER_ADDRESS=aggregation_server:8080
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PROMETHEUS_PORT=8000
+      - LOG_LEVEL=INFO
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 60s
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      aggregation_server:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    labels:
+      - "com.federated.component=fl"
+      - "com.federated.service=bank_client"
+      - "com.federated.role=client"
+      - "com.federated.bank_id=bank1"
+      - "com.federated.product_cd=W"
+    command: >
+      sh -c "echo 'Bank Client 1 ready. Start with: python -m src.federated.bank_client' && tail -f /dev/null"
+
+  # Bank Client 2 (ProductCD: H, R)
+  bank_client_2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bank_client
+    container_name: bank_client_2
+    ports:
+      - "8200:8000"  # Prometheus metrics
+    volumes:
+      - ../config:/app/config:ro
+      - ../data:/app/data:ro
+      - bank2_models:/app/models
+      - bank2_logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - BANK_ID=bank2
+      - PRODUCT_CD=H,R
+      - FL_SERVER_ADDRESS=aggregation_server:8080
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PROMETHEUS_PORT=8000
+      - LOG_LEVEL=INFO
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 60s
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      aggregation_server:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    labels:
+      - "com.federated.component=fl"
+      - "com.federated.service=bank_client"
+      - "com.federated.role=client"
+      - "com.federated.bank_id=bank2"
+      - "com.federated.product_cd=H,R"
+    command: >
+      sh -c "echo 'Bank Client 2 ready. Start with: python -m src.federated.bank_client' && tail -f /dev/null"
+
+  # Bank Client 3 (ProductCD: S, C)
+  bank_client_3:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.bank_client
+    container_name: bank_client_3
+    ports:
+      - "8300:8000"  # Prometheus metrics
+    volumes:
+      - ../config:/app/config:ro
+      - ../data:/app/data:ro
+      - bank3_models:/app/models
+      - bank3_logs:/app/logs
+    environment:
+      - PYTHONUNBUFFERED=1
+      - BANK_ID=bank3
+      - PRODUCT_CD=S,C
+      - FL_SERVER_ADDRESS=aggregation_server:8080
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - PROMETHEUS_PORT=8000
+      - LOG_LEVEL=INFO
+    networks:
+      - fl_network
+    restart: unless-stopped
+    stop_grace_period: 60s
+    stop_signal: SIGTERM
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    depends_on:
+      aggregation_server:
+        condition: service_healthy
+      mlflow:
+        condition: service_healthy
+    labels:
+      - "com.federated.component=fl"
+      - "com.federated.service=bank_client"
+      - "com.federated.role=client"
+      - "com.federated.bank_id=bank3"
+      - "com.federated.product_cd=S,C"
+    command: >
+      sh -c "echo 'Bank Client 3 ready. Start with: python -m src.federated.bank_client' && tail -f /dev/null"
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  fl_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ============================================================================
+# Volumes (Persistent Storage)
+# ============================================================================
+volumes:
+  # MLflow volumes
+  mlflow_artifacts:
+    driver: local
+  mlflow_backend:
+    driver: local
+  
+  # Prometheus volumes
+  prometheus_data:
+    driver: local
+  
+  # Grafana volumes
+  grafana_data:
+    driver: local
+  
+  # Server volumes
+  server_models:
+    driver: local
+  server_logs:
+    driver: local
+  server_results:
+    driver: local
+  
+  # Bank client volumes
+  bank1_models:
+    driver: local
+  bank1_logs:
+    driver: local
+  bank2_models:
+    driver: local
+  bank2_logs:
+    driver: local
+  bank3_models:
+    driver: local
+  bank3_logs:
+    driver: local

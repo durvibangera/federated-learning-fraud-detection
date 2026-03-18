@@ -1,0 +1,9 @@
+{
+  "test_auprc": 0.3866530131280345,
+  "test_auroc": 0.8604784626722782,
+  "architecture": "[512, 256]",
+  "epochs": 20,
+  "learning_rate": 0.005,
+  "pos_weight": 15.0,
+  "dropout": 0.3
+}

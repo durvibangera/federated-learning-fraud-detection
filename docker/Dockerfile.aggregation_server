@@ -1,0 +1,58 @@
+# Dockerfile for Aggregation_Server (Federated Learning Server)
+# This container runs the central aggregation server
+
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+COPY requirements-minimal.txt .
+
+# Install Python dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# Copy source code
+COPY src/ ./src/
+COPY config/ ./config/
+COPY setup.py .
+COPY README.md .
+
+# Install package in editable mode
+RUN pip install -e .
+
+# Create directories for models and logs
+RUN mkdir -p /app/models \
+             /app/logs \
+             /app/results
+
+# Set permissions
+RUN chmod -R 755 /app
+
+# Expose Flower server port
+EXPOSE 8080
+
+# Expose Prometheus metrics port
+EXPOSE 8001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/ || exit 1
+
+# Default command (will be overridden by docker-compose)
+CMD ["python", "-c", "print('Aggregation Server container ready. Use docker-compose to start.')"]

@@ -1,0 +1,15 @@
+# Minimal requirements for Task 1 verification
+# Core utilities
+pyyaml>=6.0
+loguru>=0.7.0
+pathlib2>=2.3.7
+
+# Basic ML (smaller packages first)
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Testing
+pytest>=7.4.0
+
+# Configuration
+python-dotenv>=1.0.0

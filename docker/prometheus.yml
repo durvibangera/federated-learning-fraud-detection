@@ -1,0 +1,62 @@
+# Prometheus Configuration for Federated Learning Monitoring
+
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+  external_labels:
+    monitor: 'federated-fraud-detection'
+
+# Alertmanager configuration (optional)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  # - "alert_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Aggregation Server metrics
+  - job_name: 'aggregation_server'
+    static_configs:
+      - targets: ['aggregation_server:8001']
+        labels:
+          component: 'server'
+          role: 'aggregation'
+
+  # Bank Client 1 metrics
+  - job_name: 'bank_client_1'
+    static_configs:
+      - targets: ['bank_client_1:8000']
+        labels:
+          component: 'client'
+          bank_id: 'bank1'
+          product_cd: 'W'
+
+  # Bank Client 2 metrics
+  - job_name: 'bank_client_2'
+    static_configs:
+      - targets: ['bank_client_2:8000']
+        labels:
+          component: 'client'
+          bank_id: 'bank2'
+          product_cd: 'H,R'
+
+  # Bank Client 3 metrics
+  - job_name: 'bank_client_3'
+    static_configs:
+      - targets: ['bank_client_3:8000']
+        labels:
+          component: 'client'
+          bank_id: 'bank3'
+          product_cd: 'S,C'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          component: 'monitoring'

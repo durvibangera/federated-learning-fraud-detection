@@ -1,0 +1,355 @@
+{
+  "dashboard": {
+    "title": "Federated Fraud Detection - Real-Time Monitoring",
+    "tags": ["federated-learning", "fraud-detection", "privacy"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "FL Rounds Progress",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "fl_rounds_completed",
+            "legendFormat": "Completed Rounds",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Rounds"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 2,
+        "title": "FL Round Duration",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(fl_round_duration_seconds_sum[5m]) / rate(fl_round_duration_seconds_count[5m])",
+            "legendFormat": "Avg Duration ({{round_type}})",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Model Performance - AUPRC",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "model_auprc{model_type=\"global\"}",
+            "legendFormat": "Global Model",
+            "refId": "A"
+          },
+          {
+            "expr": "model_auprc{model_type=\"local\"}",
+            "legendFormat": "{{client_id}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "AUPRC", "min": 0, "max": 1},
+          {"format": "short"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [0.5], "type": "lt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "avg"},
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "Low AUPRC Alert",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 4,
+        "title": "Model Performance - AUROC",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 8, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "model_auroc{model_type=\"global\"}",
+            "legendFormat": "Global Model",
+            "refId": "A"
+          },
+          {
+            "expr": "model_auroc{model_type=\"local\"}",
+            "legendFormat": "{{client_id}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "AUROC", "min": 0, "max": 1},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Privacy Budget - Epsilon Spent",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "privacy_epsilon_spent",
+            "legendFormat": "{{client_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Epsilon (ε)"},
+          {"format": "short"}
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {"params": [0.1], "type": "lt"},
+              "operator": {"type": "and"},
+              "query": {"params": ["A", "5m", "now"]},
+              "reducer": {"params": [], "type": "last"},
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "Privacy Budget Low Alert",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 6,
+        "title": "Privacy Budget - Remaining",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 16, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "privacy_epsilon_remaining",
+            "legendFormat": "{{client_id}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Epsilon Remaining"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Convergence Score",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "convergence_score",
+            "legendFormat": "Convergence Score",
+            "refId": "A"
+          },
+          {
+            "expr": "is_converged",
+            "legendFormat": "Is Converged",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "Score", "min": 0, "max": 1},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Model Weight Change",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 24, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "model_weight_change",
+            "legendFormat": "L2 Norm of Weight Changes",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "L2 Norm"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Client Participation",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 32, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "fl_clients_participating",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Client Failures",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 32, "w": 6, "h": 4},
+        "targets": [
+          {
+            "expr": "sum(fl_client_failures_total)",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "System Memory Usage",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 32, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "system_memory_usage_bytes",
+            "legendFormat": "{{component}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "bytes", "label": "Memory"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 12,
+        "title": "System CPU Usage",
+        "type": "graph",
+        "gridPos": {"x": 0, "y": 40, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "system_cpu_usage_percent",
+            "legendFormat": "{{component}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "CPU %", "min": 0, "max": 100},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Network Traffic",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 40, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(network_bytes_sent_total[5m])",
+            "legendFormat": "Sent - {{component}}",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(network_bytes_received_total[5m])",
+            "legendFormat": "Received - {{component}}",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "Bps", "label": "Bytes/sec"},
+          {"format": "short"}
+        ]
+      },
+      {
+        "id": 14,
+        "title": "System Health Status",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 48, "w": 12, "h": 4},
+        "targets": [
+          {
+            "expr": "system_health_status",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "colorMode": "background",
+          "graphMode": "none",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": ["lastNotNull"],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "value_and_name"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"type": "value", "value": "1", "text": "Healthy"},
+              {"type": "value", "value": "0", "text": "Unhealthy"}
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "green", "value": 1}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "FL Round Success Rate",
+        "type": "graph",
+        "gridPos": {"x": 12, "y": 48, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "rate(fl_rounds_total{status=\"success\"}[5m]) / rate(fl_rounds_total[5m])",
+            "legendFormat": "Success Rate",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percentunit", "label": "Success Rate", "min": 0, "max": 1},
+          {"format": "short"}
+        ]
+      }
+    ]
+  }
+}

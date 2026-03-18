@@ -1,0 +1,73 @@
+# Federated Fraud Detection System Configuration
+
+# Federated Learning Configuration
+federated_learning:
+  num_rounds: 30
+  min_fit_clients: 2
+  min_evaluate_clients: 2
+  min_available_clients: 3
+  strategy: "FedProx"
+  proximal_mu: 0.01
+  local_epochs: 3
+
+# Model Architecture Configuration
+model:
+  embedding_dim: 50
+  hidden_dims: [256, 128, 64]
+  dropout_rate: 0.3
+  learning_rate: 0.001
+  batch_size: 1024
+  weight_decay: 1e-5
+
+# Privacy Configuration
+privacy:
+  epsilon: 1.0
+  delta: 0.00001
+  max_grad_norm: 1.0
+  noise_multiplier: 1.1
+  target_epsilons: [0.5, 1.0, 2.0, 4.0, 8.0]
+
+# Data Processing Configuration
+data:
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+  missing_threshold: 0.5
+  random_seed: 42
+  
+  # Categorical features for embedding
+  categorical_features:
+    - "card1"
+    - "card2" 
+    - "card3"
+    - "card4"
+    - "card5"
+    - "card6"
+    - "P_emaildomain"
+    - "R_emaildomain"
+    - "DeviceInfo"
+    - "DeviceType"
+    - "ProductCD"
+
+# Monitoring Configuration
+monitoring:
+  mlflow_tracking_uri: "http://localhost:5000"
+  prometheus_port: 8000
+  grafana_port: 3000
+  log_level: "INFO"
+  experiment_name: "federated_fraud_detection"
+
+# Paths Configuration
+paths:
+  data_raw: "data/raw"
+  data_splits: "data/splits"
+  models: "models"
+  logs: "logs"
+  results: "results"
+
+# System Configuration
+system:
+  num_workers: 4
+  device: "auto"  # auto, cpu, cuda
+  memory_limit_gb: 8
+  checkpoint_frequency: 5  # Save every N rounds

@@ -1,0 +1,5 @@
+# Auto-generated bank splits will be placed here
+# bank1.csv - ProductCD = 'W'
+# bank2.csv - ProductCD = 'H', 'R'  
+# bank3.csv - ProductCD = 'S', 'C'
+# vocab.json - categorical feature vocabulary

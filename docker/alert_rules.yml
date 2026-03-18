@@ -1,0 +1,115 @@
+# Prometheus Alert Rules for Federated Learning
+
+groups:
+  - name: federated_learning_alerts
+    interval: 30s
+    rules:
+      # Alert when AUPRC drops below threshold
+      - alert: LowAUPRC
+        expr: model_auprc{model_type="global"} < 0.5
+        for: 5m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "Low AUPRC detected on global model"
+          description: "Global model AUPRC is {{ $value | humanize }} (threshold: 0.5)"
+
+      # Alert when privacy budget is nearly exhausted
+      - alert: PrivacyBudgetLow
+        expr: privacy_epsilon_remaining < 0.1
+        for: 1m
+        labels:
+          severity: critical
+          component: privacy
+        annotations:
+          summary: "Privacy budget nearly exhausted"
+          description: "Client {{ $labels.client_id }} has {{ $value | humanize }} epsilon remaining"
+
+      # Alert when privacy budget is exhausted
+      - alert: PrivacyBudgetExhausted
+        expr: privacy_budget_exhausted == 1
+        for: 1m
+        labels:
+          severity: critical
+          component: privacy
+        annotations:
+          summary: "Privacy budget exhausted"
+          description: "Client {{ $labels.client_id }} has exhausted privacy budget"
+
+      # Alert on high client failure rate
+      - alert: HighClientFailureRate
+        expr: rate(fl_client_failures_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: reliability
+        annotations:
+          summary: "High client failure rate detected"
+          description: "Client failure rate is {{ $value | humanize }} failures/sec"
+
+      # Alert when system is unhealthy
+      - alert: SystemUnhealthy
+        expr: system_health_status == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "System health check failed"
+          description: "System is reporting unhealthy status"
+
+      # Alert on high memory usage
+      - alert: HighMemoryUsage
+        expr: (system_memory_usage_bytes / system_memory_available_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: resources
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} of available memory"
+
+      # Alert on high CPU usage
+      - alert: HighCPUUsage
+        expr: system_cpu_usage_percent > 90
+        for: 10m
+        labels:
+          severity: warning
+          component: resources
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}%"
+
+      # Alert when FL round takes too long
+      - alert: SlowFLRound
+        expr: fl_round_duration_seconds > 600
+        for: 1m
+        labels:
+          severity: warning
+          component: performance
+        annotations:
+          summary: "FL round taking too long"
+          description: "FL round duration is {{ $value | humanize }} seconds (threshold: 600s)"
+
+      # Alert when model hasn't converged after many rounds
+      - alert: ModelNotConverging
+        expr: fl_rounds_completed > 20 and is_converged == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: training
+        annotations:
+          summary: "Model not converging"
+          description: "Model has not converged after {{ $value | humanize }} rounds"
+
+      # Alert on FL round failures
+      - alert: FLRoundFailures
+        expr: rate(fl_rounds_total{status="failed"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          component: reliability
+        annotations:
+          summary: "FL rounds failing"
+          description: "FL round failure rate is {{ $value | humanize }} failures/sec"
