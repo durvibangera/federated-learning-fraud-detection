@@ -76,7 +76,7 @@ class Data_Preprocessor:
             'initial_identities': initial_identity_count,
             'merged_records': len(merged_df),
             'identity_match_rate': (len(merged_df.dropna(subset=identity_df.columns.drop('TransactionID'))) 
-                                  / initial_transaction_count * 100)
+                                  / initial_transaction_count * 100) if initial_transaction_count > 0 else 0.0
         }
         
         self.preprocessing_stats['merge'] = merge_stats

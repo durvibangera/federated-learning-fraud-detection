@@ -189,7 +189,8 @@ grafana_data/
 # Task summaries (these seem to be generated)
 TASK_*.md
 TASKS_*.md
-
+CHECKPOINT_*.md
+CHECKPOINT_PHASE_5.md
 # Prompt files
 prompt.txt
 
