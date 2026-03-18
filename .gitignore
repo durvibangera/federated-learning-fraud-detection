@@ -188,6 +188,7 @@ grafana_data/
 
 # Task summaries (these seem to be generated)
 TASK_*.md
+TASKS_*.md
 
 # Prompt files
 prompt.txt

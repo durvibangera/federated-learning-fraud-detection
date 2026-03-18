@@ -1,0 +1,101 @@
+# Grafana Alerting Rules Configuration
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: Federated Learning Alerts
+    folder: Alerts
+    interval: 1m
+    rules:
+      - uid: low_auprc_alert
+        title: Low AUPRC Detected
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: model_auprc{model_type="global"} < 0.5
+              refId: A
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          description: 'Global model AUPRC is below 0.5'
+          summary: 'Low AUPRC detected on global model'
+        labels:
+          severity: warning
+          component: performance
+      
+      - uid: privacy_budget_low
+        title: Privacy Budget Low
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: privacy_epsilon_remaining < 0.1
+              refId: A
+        noDataState: NoData
+        execErrState: Error
+        for: 1m
+        annotations:
+          description: 'Privacy budget is nearly exhausted'
+          summary: 'Privacy budget low for client'
+        labels:
+          severity: critical
+          component: privacy
+      
+      - uid: system_unhealthy
+        title: System Unhealthy
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: system_health_status == 0
+              refId: A
+        noDataState: NoData
+        execErrState: Error
+        for: 2m
+        annotations:
+          description: 'System health check failed'
+          summary: 'System is reporting unhealthy status'
+        labels:
+          severity: critical
+          component: system
+      
+      - uid: high_client_failure_rate
+        title: High Client Failure Rate
+        condition: A
+        data:
+          - refId: A
+            queryType: ''
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: rate(fl_client_failures_total[5m]) > 0.1
+              refId: A
+        noDataState: NoData
+        execErrState: Error
+        for: 5m
+        annotations:
+          description: 'Client failure rate is high'
+          summary: 'High client failure rate detected'
+        labels:
+          severity: warning
+          component: reliability
