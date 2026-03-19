@@ -278,7 +278,7 @@ class TestPreprocessingEdgeCases:
         )
         identity_df = pd.DataFrame({"TransactionID": [1, 2, 3]})
 
-        merged = preprocessor.merge_datasets(transaction_df, identity_df)
+        preprocessor.merge_datasets(transaction_df, identity_df)
 
         # Check that stats were recorded
         stats = preprocessor.get_preprocessing_stats()

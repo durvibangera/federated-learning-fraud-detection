@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-19T00:26:09.035834",
+  "timestamp": "2026-03-19T12:30:23.561412",
   "system_info": {
     "cpu_count": 16,
     "memory_total_gb": 15.287960052490234,
@@ -11,26 +11,26 @@
   "benchmarks": {
     "data_preprocessing": {
       "num_samples": 10000,
-      "duration_seconds": 0.004,
-      "throughput_samples_per_sec": 2735831.97,
-      "memory_delta_mb": 0.24,
+      "duration_seconds": 0.003,
+      "throughput_samples_per_sec": 3321694.78,
+      "memory_delta_mb": 0.22,
       "status": "passed"
     },
     "model_training": {
       "num_samples": 5000,
       "num_epochs": 3,
-      "duration_seconds": 0.311,
-      "samples_per_sec": 48154.89,
-      "avg_loss": 0.7387,
-      "memory_delta_mb": 6.12,
+      "duration_seconds": 0.289,
+      "samples_per_sec": 51909.53,
+      "avg_loss": 0.7514,
+      "memory_delta_mb": 6.15,
       "device": "cpu",
       "status": "passed"
     },
     "model_inference": {
       "num_samples": 10000,
-      "duration_seconds": 0.013,
-      "latency_per_sample_ms": 0.001,
-      "throughput_samples_per_sec": 743644.55,
+      "duration_seconds": 0.022,
+      "latency_per_sample_ms": 0.002,
+      "throughput_samples_per_sec": 453061.13,
       "device": "cpu",
       "status": "passed"
     },

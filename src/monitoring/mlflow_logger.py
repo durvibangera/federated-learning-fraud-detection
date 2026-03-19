@@ -7,7 +7,7 @@ using MLflow, including metrics logging, model artifacts, and hyperparameters.
 
 import mlflow
 import mlflow.pytorch
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from pathlib import Path
 import torch
 import torch.nn as nn
@@ -64,7 +64,7 @@ class MLflow_Logger:
         try:
             self.experiment_id = mlflow.create_experiment(experiment_name)
             logger.info(f"Created MLflow experiment: {experiment_name}")
-        except:
+        except Exception:
             experiment = mlflow.get_experiment_by_name(experiment_name)
             if experiment:
                 self.experiment_id = experiment.experiment_id

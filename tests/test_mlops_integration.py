@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import pytest
 import json
 import yaml
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
 
 class TestMLflowIntegration:
@@ -68,7 +68,6 @@ class TestMLflowIntegration:
     def test_mlflow_log_model_artifact(self):
         """Test logging model artifacts to MLflow."""
         from src.monitoring.mlflow_logger import MLflow_Logger
-        import torch
         import torch.nn as nn
 
         logger = MLflow_Logger(tracking_uri="http://localhost:5000", experiment_name="test_experiment")

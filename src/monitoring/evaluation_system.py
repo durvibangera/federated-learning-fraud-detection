@@ -11,8 +11,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 import numpy as np
 from typing import Dict, List, Optional, Tuple, Any
-from sklearn.metrics import average_precision_score, roc_auc_score, precision_recall_curve, roc_curve, confusion_matrix
-from scipy import stats
+from sklearn.metrics import average_precision_score, roc_auc_score, confusion_matrix
 from loguru import logger
 import json
 from pathlib import Path
@@ -370,7 +369,7 @@ class Evaluation_System:
             try:
                 auprc_scores.append(average_precision_score(target_sample, pred_sample))
                 auroc_scores.append(roc_auc_score(target_sample, pred_sample))
-            except:
+            except Exception:
                 continue
 
         # Compute confidence intervals

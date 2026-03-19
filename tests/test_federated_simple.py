@@ -8,7 +8,6 @@ import sys
 
 sys.path.append("src")
 
-import torch
 from pathlib import Path
 import flwr as fl
 from flwr.server.strategy import FedProx

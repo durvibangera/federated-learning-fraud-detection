@@ -18,11 +18,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
-from hypothesis import given, strategies as st, settings, assume, HealthCheck
-from hypothesis import Phase
-import time
-from typing import Dict, List, Any
-import re
+from hypothesis import given, strategies as st, settings, HealthCheck
 
 from src.monitoring import Prometheus_Exporter, AlertConfig
 
@@ -110,6 +106,7 @@ def alert_config_strategy(draw):
 # ============================================================================
 
 
+@pytest.mark.property
 class TestProperty17_RealTimeMonitoring:
     """
     Property 17: Real-time Monitoring Integration

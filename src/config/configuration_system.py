@@ -23,8 +23,6 @@ from loguru import logger
 class ConfigError(Exception):
     """Configuration-related errors."""
 
-    pass
-
 
 class ParameterType(Enum):
     """Parameter criticality types."""
@@ -182,7 +180,6 @@ class PathsConfig:
     def validate(self) -> None:
         """Validate paths configuration."""
         # Paths are validated at runtime when accessed
-        pass
 
 
 @dataclass
@@ -427,7 +424,7 @@ class Configuration_System:
             existing_type = type(d[final_key])
             try:
                 d[final_key] = existing_type(value)
-            except:
+            except Exception:
                 d[final_key] = value
         else:
             d[final_key] = value

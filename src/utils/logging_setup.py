@@ -5,7 +5,6 @@ Configures structured JSON logging with appropriate levels and formatting.
 """
 
 import sys
-import json
 from pathlib import Path
 from loguru import logger
 from typing import Dict, Any

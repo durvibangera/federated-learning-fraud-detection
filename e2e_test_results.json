@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-03-19T12:26:55.948885",
+  "workflow_steps": {
+    "step_1_preprocessing": {
+      "status": "passed",
+      "num_samples": 5000,
+      "bank1_samples": 1974,
+      "bank2_samples": 2045,
+      "bank3_samples": 981,
+      "total_partitioned": 5000,
+      "message": "Data preprocessing completed successfully"
+    },
+    "step_2_model_init": {
+      "status": "passed",
+      "num_parameters": 16435,
+      "has_embeddings": true,
+      "output_shape": [
+        32
+      ],
+      "output_range_valid": true,
+      "message": "Model initialized successfully"
+    },
+    "step_3_privacy": {
+      "status": "passed",
+      "epsilon": 1.0,
+      "delta": 1e-05,
+      "privacy_attached": true,
+      "message": "Privacy engine integrated successfully"
+    },
+    "step_4_federated": {
+      "status": "passed",
+      "num_rounds": 3,
+      "num_clients": 3,
+      "rounds_completed": 3,
+      "message": "Federated training simulation completed"
+    },
+    "step_5_evaluation": {
+      "status": "passed",
+      "num_test_samples": 500,
+      "accuracy": 0.486,
+      "predictions_range": [
+        -1.6052427291870117,
+        3.15280818939209
+      ],
+      "message": "Model evaluation completed"
+    }
+  },
+  "overall_status": "passed"
+}

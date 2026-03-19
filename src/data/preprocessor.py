@@ -9,11 +9,9 @@ and categorical encoding for federated learning scenarios.
 import pandas as pd
 import numpy as np
 import logging
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, Tuple, Optional, Any
 from pathlib import Path
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-import warnings
 
 logger = logging.getLogger(__name__)
 

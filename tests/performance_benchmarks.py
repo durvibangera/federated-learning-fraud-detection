@@ -19,7 +19,7 @@ import torch
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 from datetime import datetime
 
 # Add src to path
@@ -27,7 +27,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.model.fraud_mlp import FraudMLP
 from src.data.preprocessor import Data_Preprocessor
-from src.privacy.privacy_engine import Privacy_Engine
 
 
 class PerformanceBenchmark:
@@ -73,7 +72,7 @@ class PerformanceBenchmark:
         start_memory = psutil.Process().memory_info().rss / (1024**2)
 
         # Simulate preprocessing steps
-        processed_data = preprocessor.handle_missing_values(synthetic_data)
+        preprocessor.handle_missing_values(synthetic_data)
 
         end_time = time.time()
         end_memory = psutil.Process().memory_info().rss / (1024**2)

@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-03-19T12:29:30.306917",
+  "tests": {
+    "privacy_budget_tracking": {
+      "status": "failed",
+      "epsilon_tests": {
+        "epsilon_0.5": {
+          "target_epsilon": 0.5,
+          "epsilon_spent": 1.9368,
+          "delta_spent": 1e-05,
+          "budget_valid": 

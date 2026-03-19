@@ -93,7 +93,7 @@ class Explainability_Engine:
                     # If model expects dict format, convert
                     try:
                         outputs = self.model(x)
-                    except:
+                    except Exception:
                         # Try dict format
                         features = {"numerical": x}
                         outputs = self.model(features)
@@ -164,7 +164,7 @@ class Explainability_Engine:
 
                 try:
                     outputs = self.model(input_tensor)
-                except:
+                except Exception:
                     features = {"numerical": input_tensor}
                     outputs = self.model(features)
 

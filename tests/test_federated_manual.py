@@ -8,7 +8,6 @@ import sys
 
 sys.path.append("src")
 
-import torch
 import numpy as np
 from pathlib import Path
 
@@ -17,7 +16,6 @@ from model import FraudMLP, PyTorch_Dataset, create_fraud_dataloader, get_catego
 from data.csv_parser import CSV_Parser
 from data.preprocessor import Data_Preprocessor
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import average_precision_score, roc_auc_score
 
 
 def prepare_bank_data(num_samples=5000):
@@ -68,7 +66,7 @@ def prepare_bank_data(num_samples=5000):
 def aggregate_weights(client_weights_list):
     """Simple FedAvg aggregation"""
     # Average all client weights
-    num_clients = len(client_weights_list)
+    len(client_weights_list)
     aggregated = []
 
     for layer_idx in range(len(client_weights_list[0])):

@@ -9,8 +9,6 @@ from prometheus_client import (
     Counter,
     Gauge,
     Histogram,
-    Summary,
-    Info,
     CollectorRegistry,
     push_to_gateway,
     start_http_server,

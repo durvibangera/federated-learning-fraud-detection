@@ -20,7 +20,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 from datetime import datetime
 
 # Add src to path
@@ -68,6 +68,13 @@ class DPVerification:
             tracking_results = {}
 
             for epsilon in epsilon_values:
+                # Create NEW model for each epsilon test (avoid hook conflicts)
+                model = FraudMLP(
+                    categorical_embedding_dims=categorical_embedding_dims,
+                    numerical_input_dim=10,
+                    hidden_dims=[64, 32],
+                ).to(device)
+
                 # Create privacy engine
                 privacy_engine = Privacy_Engine(epsilon=epsilon, delta=1e-5, max_grad_norm=1.0)
 
@@ -76,7 +83,7 @@ class DPVerification:
 
                 try:
                     private_model, private_optimizer, private_dataloader = privacy_engine.make_private(
-                        model=model, optimizer=optimizer, data_loader=dataloader
+                        model=model, optimizer=optimizer, dataloader=dataloader
                     )
 
                     # Train for a few steps
@@ -87,12 +94,12 @@ class DPVerification:
                         if batch_idx >= 5:  # Only 5 batches
                             break
 
-                        cat_features = {"ProductCD": cat_data.squeeze().to(device)}
-                        num_features = num_data.to(device)
+                        features = {"categorical": cat_data.to(device), "numerical": num_data.to(device)}
                         target = target.to(device)
 
                         private_optimizer.zero_grad()
-                        output = private_model(cat_features, num_features)
+                        output = private_model(features)
+                        output = torch.sigmoid(output)  # Apply sigmoid for BCELoss
                         loss = criterion(output.squeeze(), target)
                         loss.backward()
                         private_optimizer.step()
@@ -107,7 +114,7 @@ class DPVerification:
                         "target_epsilon": epsilon,
                         "epsilon_spent": round(epsilon_spent, 4),
                         "delta_spent": delta_spent,
-                        "budget_valid": budget_valid,
+                        "budget_valid": bool(budget_valid),
                     }
 
                     print(f"  Epsilon {epsilon}: spent={epsilon_spent:.4f}, valid={budget_valid}")
@@ -172,12 +179,12 @@ class DPVerification:
             # Train one batch without DP
             model_no_dp.train()
             for cat_data, num_data, target in dataloader:
-                cat_features = {"ProductCD": cat_data.squeeze().to(device)}
-                num_features = num_data.to(device)
+                features = {"categorical": cat_data.to(device), "numerical": num_data.to(device)}
                 target = target.to(device)
 
                 optimizer_no_dp.zero_grad()
-                output = model_no_dp(cat_features, num_features)
+                output = model_no_dp(features)
+                output = torch.sigmoid(output)  # Apply sigmoid for BCELoss
                 loss = criterion(output.squeeze(), target)
                 loss.backward()
 
@@ -191,18 +198,18 @@ class DPVerification:
 
             try:
                 private_model, private_optimizer, private_dataloader = privacy_engine.make_private(
-                    model=model, optimizer=optimizer_dp, data_loader=dataloader
+                    model=model, optimizer=optimizer_dp, dataloader=dataloader
                 )
 
                 # Train one batch with DP
                 private_model.train()
                 for cat_data, num_data, target in private_dataloader:
-                    cat_features = {"ProductCD": cat_data.squeeze().to(device)}
-                    num_features = num_data.to(device)
+                    features = {"categorical": cat_data.to(device), "numerical": num_data.to(device)}
                     target = target.to(device)
 
                     private_optimizer.zero_grad()
-                    output = private_model(cat_features, num_features)
+                    output = private_model(features)
+                    output = torch.sigmoid(output)  # Apply sigmoid for BCELoss
                     loss = criterion(output.squeeze(), target)
                     loss.backward()
                     private_optimizer.step()
@@ -223,7 +230,7 @@ class DPVerification:
                 result = {
                     "status": "passed" if noise_detected else "failed",
                     "avg_gradient_difference": round(avg_difference, 6),
-                    "noise_detected": noise_detected,
+                    "noise_detected": bool(noise_detected),
                     "message": "Noise addition verified" if noise_detected else "No noise detected in gradients",
                 }
 
@@ -273,7 +280,7 @@ class DPVerification:
 
             try:
                 private_model, private_optimizer, private_dataloader = privacy_engine.make_private(
-                    model=model, optimizer=optimizer, data_loader=dataloader
+                    model=model, optimizer=optimizer, dataloader=dataloader
                 )
 
                 # Track privacy over multiple steps
@@ -285,12 +292,12 @@ class DPVerification:
                     if batch_idx >= 10:  # 10 batches
                         break
 
-                    cat_features = {"ProductCD": cat_data.squeeze().to(device)}
-                    num_features = num_data.to(device)
+                    features = {"categorical": cat_data.to(device), "numerical": num_data.to(device)}
                     target = target.to(device)
 
                     private_optimizer.zero_grad()
-                    output = private_model(cat_features, num_features)
+                    output = private_model(features)
+                    output = torch.sigmoid(output)  # Apply sigmoid for BCELoss
                     loss = criterion(output.squeeze(), target)
                     loss.backward()
                     private_optimizer.step()
@@ -309,8 +316,8 @@ class DPVerification:
 
                 result = {
                     "status": "passed" if (monotonic and within_budget) else "failed",
-                    "monotonic_increase": monotonic,
-                    "within_budget": within_budget,
+                    "monotonic_increase": bool(monotonic),
+                    "within_budget": bool(within_budget),
                     "final_epsilon": round(final_epsilon, 4),
                     "target_epsilon": 2.0,
                     "num_steps": len(privacy_history),
@@ -349,7 +356,7 @@ class DPVerification:
 
         for epsilon in epsilon_values:
             try:
-                privacy_engine = Privacy_Engine(epsilon=epsilon, delta=1e-5, max_grad_norm=1.0)
+                Privacy_Engine(epsilon=epsilon, delta=1e-5, max_grad_norm=1.0)
 
                 results[f"epsilon_{epsilon}"] = {"supported": True, "epsilon": epsilon}
                 print(f"  Epsilon {epsilon}: supported")

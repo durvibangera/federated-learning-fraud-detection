@@ -16,9 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pytest
 import subprocess
-import time
 import yaml
-from typing import Dict, List
 
 
 class TestContainerOrchestration:

@@ -16,8 +16,7 @@ if str(src_path) not in sys.path:
 import flwr as fl
 from flwr.server.strategy import FedProx
 from flwr.server import ServerConfig
-from typing import Dict, List, Optional, Tuple, Callable
-import numpy as np
+from typing import Dict, List, Optional, Tuple
 
 from loguru import logger
 

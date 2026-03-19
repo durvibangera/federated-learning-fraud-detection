@@ -12,7 +12,6 @@ import torch.nn.functional as F
 from torch.nn import GroupNorm, Dropout, Linear, Embedding
 from typing import Dict, List, Tuple, Optional, Any
 import logging
-import math
 
 logger = logging.getLogger(__name__)
 
