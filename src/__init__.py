@@ -15,10 +15,7 @@ from src.config.config_manager import get_config
 # Set up logging with configuration
 try:
     config = get_config()
-    setup_logging(
-        log_level=config.monitoring.log_level,
-        log_dir=config.paths.logs
-    )
+    setup_logging(log_level=config.monitoring.log_level, log_dir=config.paths.logs)
 except Exception:
     # Fallback to default logging if config fails
     setup_logging()

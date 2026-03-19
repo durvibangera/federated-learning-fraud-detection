@@ -14,18 +14,18 @@ from .configuration_system import (
     MonitoringConfig,
     PathsConfig,
     SystemConfig,
-    ConfigError
+    ConfigError,
 )
 
 __all__ = [
-    'Configuration_System',
-    'SystemConfiguration',
-    'FederatedLearningConfig',
-    'ModelConfig',
-    'PrivacyConfig',
-    'DataConfig',
-    'MonitoringConfig',
-    'PathsConfig',
-    'SystemConfig',
-    'ConfigError'
+    "Configuration_System",
+    "SystemConfiguration",
+    "FederatedLearningConfig",
+    "ModelConfig",
+    "PrivacyConfig",
+    "DataConfig",
+    "MonitoringConfig",
+    "PathsConfig",
+    "SystemConfig",
+    "ConfigError",
 ]

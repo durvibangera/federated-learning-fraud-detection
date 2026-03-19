@@ -12,11 +12,11 @@ from pathlib import Path
 
 def verify_property_17_tests():
     """Verify Property 17 test implementation."""
-    
+
     print("=" * 80)
     print("Property 17 Test Verification")
     print("=" * 80)
-    
+
     # Test 1: File exists
     print("\n[Test 1] Checking if test file exists...")
     file_path = Path("tests/test_property_17_monitoring.py")
@@ -24,18 +24,18 @@ def verify_property_17_tests():
         print(f"✗ File not found: {file_path}")
         return False
     print(f"✓ File exists: {file_path}")
-    
+
     # Test 2: Parse syntax
     print("\n[Test 2] Checking Python syntax...")
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             code = f.read()
         ast.parse(code)
         print("✓ Syntax is valid")
     except SyntaxError as e:
         print(f"✗ Syntax error: {e}")
         return False
-    
+
     # Test 3: Check test class
     print("\n[Test 3] Checking test class definition...")
     if "class TestProperty17_RealTimeMonitoring:" in code:
@@ -43,7 +43,7 @@ def verify_property_17_tests():
     else:
         print("✗ Test class not found")
         return False
-    
+
     # Test 4: Check property statement
     print("\n[Test 4] Checking property statement...")
     if "Property 17: Real-time Monitoring Integration" in code:
@@ -51,26 +51,22 @@ def verify_property_17_tests():
     else:
         print("✗ Property statement missing")
         return False
-    
+
     # Test 5: Check Hypothesis imports
     print("\n[Test 5] Checking Hypothesis imports...")
-    required_imports = [
-        "from hypothesis import given",
-        "strategies as st",
-        "settings"
-    ]
-    
+    required_imports = ["from hypothesis import given", "strategies as st", "settings"]
+
     missing_imports = []
     for imp in required_imports:
         if imp not in code:
             missing_imports.append(imp)
-    
+
     if missing_imports:
         print(f"✗ Missing imports: {missing_imports}")
         return False
     else:
         print(f"✓ All Hypothesis imports found")
-    
+
     # Test 6: Check strategy definitions
     print("\n[Test 6] Checking Hypothesis strategies...")
     strategies = [
@@ -79,20 +75,20 @@ def verify_property_17_tests():
         "privacy_budget_config",
         "system_metrics_config",
         "convergence_metrics_config",
-        "alert_config_strategy"
+        "alert_config_strategy",
     ]
-    
+
     missing_strategies = []
     for strategy in strategies:
         if f"def {strategy}" not in code:
             missing_strategies.append(strategy)
-    
+
     if missing_strategies:
         print(f"✗ Missing strategies: {missing_strategies}")
         return False
     else:
         print(f"✓ All {len(strategies)} strategies found")
-    
+
     # Test 7: Check test methods
     print("\n[Test 7] Checking test methods...")
     test_methods = [
@@ -106,20 +102,20 @@ def verify_property_17_tests():
         "test_client_failure_tracking",
         "test_training_samples_tracking",
         "test_duration_tracking",
-        "test_metrics_summary_completeness"
+        "test_metrics_summary_completeness",
     ]
-    
+
     missing_tests = []
     for test in test_methods:
         if f"def {test}" not in code:
             missing_tests.append(test)
-    
+
     if missing_tests:
         print(f"✗ Missing test methods: {missing_tests}")
         return False
     else:
         print(f"✓ All {len(test_methods)} test methods found")
-    
+
     # Test 8: Check @given decorators
     print("\n[Test 8] Checking @given decorators...")
     given_count = code.count("@given(")
@@ -128,7 +124,7 @@ def verify_property_17_tests():
     else:
         print(f"✗ Only found {given_count} @given decorators (expected at least 10)")
         return False
-    
+
     # Test 9: Check @settings decorators
     print("\n[Test 9] Checking @settings decorators...")
     settings_count = code.count("@settings(")
@@ -137,7 +133,7 @@ def verify_property_17_tests():
     else:
         print(f"✗ Only found {settings_count} @settings decorators (expected at least 10)")
         return False
-    
+
     # Test 10: Check max_examples configuration
     print("\n[Test 10] Checking max_examples configuration...")
     if "max_examples=100" in code or "max_examples=50" in code:
@@ -145,7 +141,7 @@ def verify_property_17_tests():
     else:
         print("✗ max_examples not properly configured")
         return False
-    
+
     # Test 11: Check property assertions
     print("\n[Test 11] Checking property assertions...")
     assert_count = code.count("assert ")
@@ -153,7 +149,7 @@ def verify_property_17_tests():
         print(f"✓ Found {assert_count} assertions")
     else:
         print(f"⚠ Only found {assert_count} assertions (expected more)")
-    
+
     # Test 12: Check requirements validation
     print("\n[Test 12] Checking requirements validation...")
     if "Requirements 7.3, 7.4, 7.6" in code:
@@ -161,7 +157,7 @@ def verify_property_17_tests():
     else:
         print("✗ Requirements validation missing")
         return False
-    
+
     # Test 13: Check feature tag
     print("\n[Test 13] Checking feature tag...")
     if "Feature: federated-fraud-detection" in code:
@@ -169,15 +165,15 @@ def verify_property_17_tests():
     else:
         print("✗ Feature tag missing")
         return False
-    
+
     # Test 14: Count lines of code
     print("\n[Test 14] Code statistics...")
-    lines = code.split('\n')
+    lines = code.split("\n")
     total_lines = len(lines)
-    code_lines = len([l for l in lines if l.strip() and not l.strip().startswith('#')])
+    code_lines = len([l for l in lines if l.strip() and not l.strip().startswith("#")])
     print(f"✓ Total lines: {total_lines}")
     print(f"✓ Code lines: {code_lines}")
-    
+
     # Test 15: Check Prometheus_Exporter usage
     print("\n[Test 15] Checking Prometheus_Exporter usage...")
     if "Prometheus_Exporter" in code and "from src.monitoring import" in code:
@@ -185,7 +181,7 @@ def verify_property_17_tests():
     else:
         print("✗ Prometheus_Exporter not properly imported")
         return False
-    
+
     print("\n" + "=" * 80)
     print("All Verification Checks Passed! ✓")
     print("=" * 80)
@@ -209,7 +205,7 @@ def verify_property_17_tests():
     print("  pytest tests/test_property_17_monitoring.py -v")
     print("  or")
     print("  python tests/test_property_17_monitoring.py")
-    
+
     return True
 
 

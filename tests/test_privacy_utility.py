@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 # Add src to path
-src_path = Path(__file__).parent / 'src'
+src_path = Path(__file__).parent / "src"
 sys.path.insert(0, str(src_path))
 
 from privacy import Privacy_Utility_Analyzer
@@ -19,11 +19,7 @@ print("=" * 70)
 
 # Initialize analyzer
 print("\n[1/4] Initializing Privacy_Utility_Analyzer...")
-analyzer = Privacy_Utility_Analyzer(
-    target_epsilons=[0.5, 1.0, 2.0, 4.0, 8.0],
-    delta=1e-5,
-    max_grad_norm=1.0
-)
+analyzer = Privacy_Utility_Analyzer(target_epsilons=[0.5, 1.0, 2.0, 4.0, 8.0], delta=1e-5, max_grad_norm=1.0)
 print("✓ Analyzer initialized")
 
 # Simulate experimental results
@@ -38,13 +34,7 @@ experimental_results = [
 ]
 
 for epsilon, auprc, auroc, loss, eps_spent in experimental_results:
-    analyzer.add_result(
-        epsilon=epsilon,
-        auprc=auprc,
-        auroc=auroc,
-        loss=loss,
-        epsilon_spent=eps_spent
-    )
+    analyzer.add_result(epsilon=epsilon, auprc=auprc, auroc=auroc, loss=loss, epsilon_spent=eps_spent)
 print(f"✓ Added {len(experimental_results)} experimental results")
 
 # Get privacy-utility curve
@@ -72,7 +62,7 @@ print(f"  Best epsilon for AUROC: {summary['best_epsilon_auroc']}")
 
 # Export results
 print("\n[Bonus] Exporting results to JSON...")
-analyzer.export_results('results/privacy_utility_analysis.json')
+analyzer.export_results("results/privacy_utility_analysis.json")
 print("✓ Results exported to results/privacy_utility_analysis.json")
 
 print("\n" + "=" * 70)

@@ -7,4 +7,4 @@ for privacy-preserving federated learning.
 
 from .privacy_engine import Privacy_Engine, Privacy_Utility_Analyzer
 
-__all__ = ['Privacy_Engine', 'Privacy_Utility_Analyzer']
+__all__ = ["Privacy_Engine", "Privacy_Utility_Analyzer"]

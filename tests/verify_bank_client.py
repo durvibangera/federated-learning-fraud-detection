@@ -4,7 +4,8 @@ Simple verification script for Bank_Client implementation
 """
 
 import sys
-sys.path.append('src')
+
+sys.path.append("src")
 
 print("Verifying Bank_Client implementation...")
 print()
@@ -12,13 +13,14 @@ print()
 # Check imports
 try:
     from federated.bank_client import Bank_Client
+
     print("✓ Bank_Client import successful")
 except ImportError as e:
     print(f"✗ Failed to import Bank_Client: {e}")
     sys.exit(1)
 
 # Check class structure
-required_methods = ['get_parameters', 'set_parameters', 'fit', 'evaluate']
+required_methods = ["get_parameters", "set_parameters", "fit", "evaluate"]
 for method in required_methods:
     if hasattr(Bank_Client, method):
         print(f"✓ Bank_Client.{method}() method exists")
@@ -28,10 +30,11 @@ for method in required_methods:
 
 # Check initialization parameters
 import inspect
+
 sig = inspect.signature(Bank_Client.__init__)
 params = list(sig.parameters.keys())
 
-required_params = ['self', 'bank_id', 'model', 'train_loader', 'val_loader']
+required_params = ["self", "bank_id", "model", "train_loader", "val_loader"]
 for param in required_params:
     if param in params:
         print(f"✓ __init__ has '{param}' parameter")
