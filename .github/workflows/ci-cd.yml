@@ -7,6 +7,10 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+  security-events: write
+
 env:
   PYTHON_VERSION: '3.10'
   HYPOTHESIS_PROFILE: ci
@@ -214,11 +218,19 @@ jobs:
         format: 'sarif'
         output: 'trivy-aggregation-server.sarif'
     
-    - name: Upload Trivy scan results to GitHub Security
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
+    - name: Upload Trivy bank-client SARIF
+      uses: github/codeql-action/upload-sarif@v4
+      if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork)
       with:
-        sarif_file: '.'
+        sarif_file: trivy-bank-client.sarif
+        category: trivy-bank-client
+
+    - name: Upload Trivy aggregation-server SARIF
+      uses: github/codeql-action/upload-sarif@v4
+      if: always() && (github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork)
+      with:
+        sarif_file: trivy-aggregation-server.sarif
+        category: trivy-aggregation-server
 
   performance-tests:
     name: Performance Benchmarks
