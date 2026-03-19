@@ -344,12 +344,13 @@ class TestProperty17_RealTimeMonitoring:
             if config["status"] == "success":
                 successful_rounds.append(config["round_num"])
 
-        # Property: If there were successful rounds, the last one should be recorded
+        # Property: If there were successful rounds, the highest one should be recorded
         if successful_rounds:
             summary = exporter.get_metrics_summary()
-            assert summary["fl_rounds_completed"] == max(
-                successful_rounds
-            ), "Completed rounds should reflect the highest successful round number"
+            assert summary["fl_rounds_completed"] == max(successful_rounds), (
+                f"Completed rounds should reflect the highest successful round number: expected "
+                f"{max(successful_rounds)}, got {summary['fl_rounds_completed']}"
+            )
 
     @given(
         client_id=st.sampled_from(["bank1", "bank2", "bank3"]),

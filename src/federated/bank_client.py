@@ -13,16 +13,8 @@ from typing import Dict, List, Tuple, Optional
 import flwr as fl
 from collections import OrderedDict
 
-import sys
-from pathlib import Path
-
-# Add src to path for imports
-src_path = Path(__file__).parent.parent
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
-
 from loguru import logger
-from model.fraud_mlp import FraudMLP
+from src.model.fraud_mlp import FraudMLP
 
 logger = logger
 
@@ -102,7 +94,7 @@ class Bank_Client(fl.client.NumPyClient):
         logger.debug(f"{self.bank_id}: Extracting model parameters")
 
         # Convert PyTorch parameters to numpy arrays
-        parameters = [val.cpu().numpy() for _, val in self.model.state_dict().items()]
+        parameters = [val.detach().cpu().numpy().copy() for _, val in self.model.state_dict().items()]
 
         logger.info(f"{self.bank_id}: Extracted {len(parameters)} parameter tensors")
         return parameters

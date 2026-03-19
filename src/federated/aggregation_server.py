@@ -5,14 +5,6 @@ This module implements the central aggregation server that coordinates
 federated learning rounds using the FedProx strategy.
 """
 
-import sys
-from pathlib import Path
-
-# Add src to path for imports
-src_path = Path(__file__).parent.parent
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
-
 import flwr as fl
 from flwr.server.strategy import FedProx
 from flwr.server import ServerConfig

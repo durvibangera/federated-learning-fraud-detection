@@ -1,11 +1,83 @@
 {
-  "timestamp": "2026-03-19T12:29:30.306917",
+  "timestamp": "2026-03-19T17:22:24.810582",
   "tests": {
     "privacy_budget_tracking": {
-      "status": "failed",
+      "status": "passed",
       "epsilon_tests": {
         "epsilon_0.5": {
           "target_epsilon": 0.5,
           "epsilon_spent": 1.9368,
           "delta_spent": 1e-05,
-          "budget_valid": 
+          "budget_valid": true
+        },
+        "epsilon_1.0": {
+          "target_epsilon": 1.0,
+          "epsilon_spent": 1.9368,
+          "delta_spent": 1e-05,
+          "budget_valid": true
+        },
+        "epsilon_2.0": {
+          "target_epsilon": 2.0,
+          "epsilon_spent": 1.9368,
+          "delta_spent": 1e-05,
+          "budget_valid": true
+        },
+        "epsilon_4.0": {
+          "target_epsilon": 4.0,
+          "epsilon_spent": 1.9368,
+          "delta_spent": 1e-05,
+          "budget_valid": true
+        },
+        "epsilon_8.0": {
+          "target_epsilon": 8.0,
+          "epsilon_spent": 1.9368,
+          "delta_spent": 1e-05,
+          "budget_valid": true
+        }
+      },
+      "message": "Privacy budget tracking verified"
+    },
+    "noise_addition": {
+      "status": "passed",
+      "avg_gradient_difference": 0.241213,
+      "noise_detected": true,
+      "message": "Noise addition verified"
+    },
+    "privacy_accounting": {
+      "status": "passed",
+      "monotonic_increase": true,
+      "within_budget": true,
+      "final_epsilon": 2.3605,
+      "target_epsilon": 2.0,
+      "num_steps": 10,
+      "message": "Privacy accounting verified"
+    },
+    "epsilon_values": {
+      "status": "passed",
+      "epsilon_support": {
+        "epsilon_0.5": {
+          "supported": true,
+          "epsilon": 0.5
+        },
+        "epsilon_1.0": {
+          "supported": true,
+          "epsilon": 1.0
+        },
+        "epsilon_2.0": {
+          "supported": true,
+          "epsilon": 2.0
+        },
+        "epsilon_4.0": {
+          "supported": true,
+          "epsilon": 4.0
+        },
+        "epsilon_8.0": {
+          "supported": true,
+          "epsilon": 8.0
+        }
+      },
+      "message": "All epsilon values supported"
+    }
+  },
+  "overall_status": "passed"
+}

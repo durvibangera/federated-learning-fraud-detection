@@ -146,7 +146,7 @@ def main():
         global_weights = aggregate_weights(client_weights_list)
 
         # Evaluate global model
-        print(f"  Evaluating global model...")
+        print("  Evaluating global model...")
         eval_metrics_list = []
         for client in clients:
             loss, num_examples, metrics = client.evaluate(parameters=global_weights, config={"round": str(round_num)})

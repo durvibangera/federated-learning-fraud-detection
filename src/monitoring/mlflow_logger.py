@@ -9,6 +9,7 @@ import mlflow
 import mlflow.pytorch
 from typing import Dict, Any, Optional
 from pathlib import Path
+import tempfile
 import torch
 import torch.nn as nn
 from loguru import logger
@@ -51,27 +52,38 @@ class MLflow_Logger:
         self.tracking_uri = tracking_uri
         self.run_id = None
         self.run_name = run_name
+        self.available = True
 
-        # Set MLflow tracking URI
+        # Set MLflow tracking URI and validate connectivity by creating/getting the experiment.
         try:
             mlflow.set_tracking_uri(tracking_uri)
             logger.info(f"MLflow tracking URI set to: {tracking_uri}")
+            self.experiment_id = self._ensure_experiment(experiment_name)
         except Exception as e:
-            logger.warning(f"Failed to set MLflow tracking URI: {e}")
-            logger.info("Using local file-based tracking")
+            logger.warning(f"Remote MLflow unavailable, falling back to local tracking: {e}")
+            self._fallback_to_local_tracking()
+            self.experiment_id = self._ensure_experiment(experiment_name)
 
-        # Create or get experiment
+    def _ensure_experiment(self, experiment_name: str) -> Optional[str]:
+        """Create or get the configured experiment and return its ID."""
         try:
-            self.experiment_id = mlflow.create_experiment(experiment_name)
+            experiment_id = mlflow.create_experiment(experiment_name)
             logger.info(f"Created MLflow experiment: {experiment_name}")
+            return experiment_id
         except Exception:
             experiment = mlflow.get_experiment_by_name(experiment_name)
             if experiment:
-                self.experiment_id = experiment.experiment_id
                 logger.info(f"Using existing MLflow experiment: {experiment_name}")
-            else:
-                self.experiment_id = None
-                logger.warning("Could not create or find MLflow experiment")
+                return experiment.experiment_id
+            logger.warning("Could not create or find MLflow experiment")
+            return None
+
+    def _fallback_to_local_tracking(self) -> None:
+        """Switch to local file-based MLflow tracking."""
+        local_store = Path("mlruns").resolve()
+        local_store.mkdir(parents=True, exist_ok=True)
+        mlflow.set_tracking_uri(local_store.as_uri())
+        self.available = False
 
     def start_run(self, run_name: Optional[str] = None, tags: Optional[Dict[str, str]] = None) -> str:
         """
@@ -205,16 +217,16 @@ class MLflow_Logger:
             if round_num is not None:
                 filename = f"model_state_round_{round_num}.pth"
 
-            # Save to temporary file
-            temp_path = Path(f"/tmp/{filename}")
-            torch.save(state_dict, temp_path)
+            # Save to a secure temporary file
+            with tempfile.NamedTemporaryFile(suffix=f"_{filename}", delete=False) as temp_file:
+                temp_path = Path(temp_file.name)
 
-            # Log as artifact
-            mlflow.log_artifact(str(temp_path))
-            logger.info(f"Logged model state dict: {filename}")
-
-            # Clean up
-            temp_path.unlink()
+            try:
+                torch.save(state_dict, temp_path)
+                mlflow.log_artifact(str(temp_path))
+                logger.info(f"Logged model state dict: {filename}")
+            finally:
+                temp_path.unlink(missing_ok=True)
 
         except Exception as e:
             logger.error(f"Failed to log model state dict: {e}")
@@ -228,17 +240,16 @@ class MLflow_Logger:
             filename: Filename for the config
         """
         try:
-            # Save to temporary file
-            temp_path = Path(f"/tmp/{filename}")
-            with open(temp_path, "w") as f:
+            # Save to a secure temporary file
+            with tempfile.NamedTemporaryFile(mode="w", suffix=f"_{filename}", delete=False, encoding="utf-8") as f:
+                temp_path = Path(f.name)
                 json.dump(config, f, indent=2)
 
-            # Log as artifact
-            mlflow.log_artifact(str(temp_path))
-            logger.info(f"Logged configuration: {filename}")
-
-            # Clean up
-            temp_path.unlink()
+            try:
+                mlflow.log_artifact(str(temp_path))
+                logger.info(f"Logged configuration: {filename}")
+            finally:
+                temp_path.unlink(missing_ok=True)
 
         except Exception as e:
             logger.error(f"Failed to log configuration: {e}")

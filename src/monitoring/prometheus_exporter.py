@@ -292,7 +292,13 @@ class Prometheus_Exporter:
         self.fl_clients_participating.set(num_clients)
         logger.debug(f"FL round {round_num} started with {num_clients} clients")
 
-    def record_fl_round_complete(self, round_num: int, duration_seconds: float, status: str = "success") -> None:
+    def record_fl_round_complete(
+        self,
+        round_num: int,
+        duration_seconds: Optional[float] = None,
+        status: str = "success",
+        duration: Optional[float] = None,
+    ) -> None:
         """
         Record completion of a FL round.
 
@@ -300,15 +306,21 @@ class Prometheus_Exporter:
             round_num: FL round number
             duration_seconds: Duration of the round
             status: Status (success, failed, skipped)
+            duration: Backward-compatible alias for duration_seconds
         """
+        observed_duration = duration_seconds if duration_seconds is not None else duration
+        if observed_duration is None:
+            raise ValueError("Either duration_seconds or duration must be provided")
+
         self.fl_rounds_total.labels(status=status).inc()
 
         if status == "success":
-            self.fl_rounds_completed.set(round_num)
+            current_round = self.fl_rounds_completed._value.get()
+            self.fl_rounds_completed.set(max(current_round, round_num))
 
-        self.fl_round_duration_seconds.labels(round_type="full_round").observe(duration_seconds)
+        self.fl_round_duration_seconds.labels(round_type="full_round").observe(observed_duration)
 
-        logger.debug(f"FL round {round_num} completed: {status} ({duration_seconds:.2f}s)")
+        logger.debug(f"FL round {round_num} completed: {status} ({observed_duration:.2f}s)")
 
     def record_training_duration(self, duration_seconds: float, client_id: str = "global") -> None:
         """
@@ -414,7 +426,7 @@ class Prometheus_Exporter:
 
         # Disk metrics
         if "disk_usage_bytes" in metrics:
-            self.system_disk_usage_bytes.labels(path="/").set(metrics["disk_usage_bytes"])
+            self.disk_usage_bytes.labels(path="/").set(metrics["disk_usage_bytes"])
 
         # Health status
         if "health_status" in metrics:

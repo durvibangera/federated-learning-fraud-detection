@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-03-19T12:26:55.948885",
+  "timestamp": "2026-03-19T17:21:28.033613",
   "workflow_steps": {
     "step_1_preprocessing": {
       "status": "passed",
       "num_samples": 5000,
-      "bank1_samples": 1974,
-      "bank2_samples": 2045,
-      "bank3_samples": 981,
+      "bank1_samples": 2026,
+      "bank2_samples": 2010,
+      "bank3_samples": 964,
       "total_partitioned": 5000,
       "message": "Data preprocessing completed successfully"
     },
@@ -37,10 +37,10 @@
     "step_5_evaluation": {
       "status": "passed",
       "num_test_samples": 500,
-      "accuracy": 0.486,
+      "accuracy": 0.498,
       "predictions_range": [
-        -1.6052427291870117,
-        3.15280818939209
+        -2.0552303791046143,
+        1.824607491493225
       ],
       "message": "Model evaluation completed"
     }

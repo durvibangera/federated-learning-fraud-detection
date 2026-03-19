@@ -24,7 +24,6 @@ def test_bank_client_initialization():
     )
 
     # Create dummy data
-    cat_data = {"cat1": torch.randint(0, 10, (100,)), "cat2": torch.randint(0, 20, (100,))}
     num_data = torch.randn(100, 10)
     targets = torch.randint(0, 2, (100,)).float()
 

@@ -405,7 +405,8 @@ class Data_Preprocessor:
         import pickle
 
         with open(filepath, "rb") as f:
-            self.label_encoders = pickle.load(f)
+            # Encoders are loaded from project-generated artifacts only.
+            self.label_encoders = pickle.load(f)  # nosec B301
 
         logger.info(f"Loaded {len(self.label_encoders)} label encoders from {filepath}")
 
